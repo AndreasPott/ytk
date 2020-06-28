@@ -22,11 +22,16 @@
 * SOFTWARE.
 */
 
-// a very simple markdown renderer class to implement kind of 
-// content management system.
-// Register this component in config/main.php and use it e.g.
-// in siteController as action handler.
-
+/** 
+ * YtkMdViewRenderer is a very simple markdown renderer class to implement kind of 
+ * content management system. This renderer allows to register a action within a 
+ * controller the gives access to all markdown files in a given directory simple
+ * by name (without implementing an event hanlder for each page). It does basically
+ * the same as its counterpart CViewRenderer for php files.
+ * 
+ * Register this component in config/main.php and use it e.g.
+ * in siteController as action handler.
+ */
 class YtkMdViewRenderer extends CViewRenderer
 {
     // define the file extension for our mini CMS system
@@ -36,7 +41,7 @@ class YtkMdViewRenderer extends CViewRenderer
     {
         $md = new CMarkdown;
         $input = file_get_contents($sourceFile);
-        $output = $md->transform($input);
+        $output = $md->transform($input);       
         file_put_contents($viewFile,$output);
     }
 

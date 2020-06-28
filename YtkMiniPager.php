@@ -1,0 +1,90 @@
+<?php 
+/* Ytk - Yii Toolkit
+*
+* Copyright (c) 2013-2020 Andreas Pott
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * YtkMiniPager is a button group that allows to navigate forth and back 
+ */
+class YtkMiniPager extends CWidget { 
+    public $model;             // the name as string of the model class derived from CActiveRecord
+    public $item;              // a model instance derived from CActiveRecord. The model must implment an attribute named id
+    public $url;               // the url to call when the button is clicked; the url must accept a GET parameter named id to pass the id of the element
+    public $filter;            // optional parameter: additional condition to filter for when determining next, prev, total index, and total item count
+
+    // assign default values for unset attributes
+    public function init() { 
+        parent::init(); 
+        // assign default values for those properties which are not defined in widget init
+        if ($this->model === null) 
+            $this->model = '';
+        if ($this->filter === null)
+            $this->filter = 'TRUE';     // if we have no specific filter condition we use TRUE as 
+                                        // this condition works both as placeholder in empty 
+                                        /// condition and as optional condition with AND 
+    } 
+
+    // render the widget by using echo to print the desired content
+    public function run() {
+        echo '<div class="pull-right">';
+        $model = $this->model;
+
+        // find the next model after the current one
+        $res = $model::model()->findAll(array(
+            'condition'=>$this->filter.' AND id > '.$this->item->id));
+        $next_id = count($res)>0 ? $res[0]->id : 0;
+        
+        // find previous model before the current one
+        $res = $model::model()->findAll(array(
+            'condition'=>$this->filter.' AND id < '.$this->item->id,
+            'order'=>'id DESC'));
+        $prev_id = count($res)>0 ? $res[0]->id : 0;
+
+        // get index number and total count of fow handouts
+        $cnt = $model::model()->count(array(
+            'condition'=>$this->filter));
+        $idx = $model::model()->count(array(
+            'condition'=>$this->filter.' AND id <= '.$this->item->id));
+
+        // generate the buttons for prev, indexpos, and next
+        $this->widget('bootstrap.widgets.TbButton', array(
+            'icon'=>'chevron-left',
+            'url'=>$prev_id>0 ? array($this->url, 'id'=>$prev_id) : '#',
+            'active'=>$prev_id == 0,
+        ));
+
+        $this->widget('bootstrap.widgets.TbButton', array(
+            'label'=>$idx.' / '.$cnt,
+            'size'=>'small',
+            'url'=>'#',
+            'active'=>true,
+        ));
+
+        $this->widget('bootstrap.widgets.TbButton', array(
+            'icon'=>'chevron-right',
+            'url'=>$next_id>0 ? array($this->url, 'id'=>$next_id) : '#',
+            'active'=>$next_id == 0,
+        ));      
+        echo '</div>';
+    } 
+} 
+?>
