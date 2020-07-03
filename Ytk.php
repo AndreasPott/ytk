@@ -170,6 +170,15 @@ class Ytk
         $str .= "]'";
         return $str;
     }
+
+    /* putputs a almost arbirary variable enclosed into a pre tag
+     * @param item is the object (typically a parameter or array)
+     * @param tag is the html tag to embed the output. Defaults to a code region in the page
+     */
+    public static function vardump($item, $tag='pre') 
+    {
+        echo CHtml::tag($tag, array(), print_r($item, true));
+    }
 }
 
 ?>
