@@ -36,9 +36,8 @@ class YtkUtil {
         $models = array();
         foreach ($files as $filename)
         {
-            $str = str_replace(".php", "", $filename);
-            $str = str_replace($path, "", $str);
-            array_push($models, $str);
+            // remote path and fileextension
+            array_push($models, basename($filename, '.php'));
         }
         return $models;
     }
