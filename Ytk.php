@@ -29,8 +29,65 @@
  * Some function relate to user management and other support markup with bootstrap.
  * All operations are static functions of the Ytk class
  */
-class Ytk
+class Ytk extends CApplicationComponent
 {
+    /**
+	 * @var boolean indicates whether assets should be republished on every request.
+	 */
+	public $forceCopyAssets = false;
+
+    protected $_assetsUrl;
+    
+    /**
+	 * Returns the URL to the published assets folder.
+	 * @return string the URL
+	 */
+	protected function getAssetsUrl()
+	{
+		if (isset($this->_assetsUrl))
+			return $this->_assetsUrl;
+		else
+		{
+            $assetsPath = Yii::getPathOfAlias('application.extensions.ytk.assets');    // we do not receive a proper url here!
+            Yii::log(__METHOD__." - ".$assetsPath);
+			$assetsUrl = Yii::app()->assetManager->publish($assetsPath, false, -1, $this->forceCopyAssets);
+			return $this->_assetsUrl = $assetsUrl;
+		}
+    }
+
+	/**
+	 * Registers the chars.js JavaScript.
+	 * @param int $position the position of the JavaScript code.
+	 */
+	protected function registerJS($position = CClientScript::POS_HEAD)
+	{
+		/** @var CClientScript $cs */
+		$cs = Yii::app()->getClientScript();
+        $filename = YII_DEBUG ? 'mermaid.min.js' : 'mermaid.min.js';    // exchange the first one for chart.js to have a readable version in debug mode
+        Yii::log(__METHOD__." - ".$this->getAssetsUrl().'/'.$filename);
+		$cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
+    }
+    
+    // public function register()
+    // {
+	// 	Yii::log(__FILE__.": ".__CLASS__."::".__METHOD__."(...)");
+    //     $this->registerJS();
+    // }
+
+	public function init() 
+	{ 
+		Yii::log(__FILE__.": ".__METHOD__."(...)");
+		$this->registerJs(); 
+		parent::init(); 
+    }
+    
+    // --------------------------------------------------------------------- //
+    // The following part of this file contains the static function being
+    // being part of the same namespace ytk but there is no connection to the
+    // component and asset management performed by the code above.
+    // --------------------------------------------------------------------- //
+
+
     // TODO: The getter functions for user are under development and not yet release for productive use
     //
     // /** A new set of session based getter functions to easily get the interesting objects, i.e.

@@ -23,11 +23,30 @@ following code snippet
 	),
 
 To the use the markdown renderer, add also the following entry to this config file
+under the section `components`
 
-    // renderer component for markdown pages simiar to the views/site/page rendering
-    'viewRenderer' => array(
-        'class'=>'YtkMdViewRenderer',
+    // application components
+	'components'=>array(
+        // [...] some components
+
+        // renderer component for markdown pages simiar to the views/site/page rendering
+        'viewRenderer' => array(
+            'class'=>'YtkMdViewRenderer',
+        ),
+        // [...] some more components
     ),
+
+To use the javascript components in the package, add the ytk component as viewRenderer to the main 
+configuration file under `components`
+
+    'ytk'=>array(
+        'class'=>'application.extensions.ytk.ytk',
+    ),
+
+Additionally, the ytk component (with asset management must be initialized in protected/views/layout/main.php
+directly after `<body>` (and if it is used right after the respective init call for the bootstrap components) with
+
+    <?php Yii::app()->ytk->init();?>
 
 # Usage of components
 The provided widgets (here `ytktile`) of the package can be used as follows:
