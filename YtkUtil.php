@@ -42,6 +42,69 @@ class YtkUtil {
         return $models;
     }
 
+    /* this function uses the typical yii data layout to receive a list with names of data models
+     */
+    public static function getAllController($path='./protected/controllers/')
+    {
+        $files = glob($path.'*.php');
+        $controller = array();
+        foreach ($files as $filename)
+        {
+            // remote path and fileextension
+            // array_push($controller, str_replace('Controller', '', basename($filename, '.php')));
+            array_push($controller, basename($filename, '.php'));
+        }
+        return $controller;
+    }
+
+    /**
+     * Extracta all actions implemented by the controller class, i.e. the name of all functions which
+     * name starts with the prefix 'action'.
+     */
+    public static function getAllActions($controller)
+    {
+        $actions = array();
+        // check if the class exists before quering its methods
+        if (!class_exists($controller))
+            return $actions;
+
+        // get all methods names for this class
+        $methods = get_class_methods($controller);
+        foreach ($methods as $method) {
+            // skip the function "actions" which has a different meaning
+            if (strpos($method,'actions') === 0)
+                continue;
+            if (strpos($method,'action') === 0)
+                array_push($actions,str_replace("action", "", $method));
+        }
+        return $actions;
+    }
+
+    public static function getAllActionsFromRbac($controller)
+    {
+        $actions = array();
+        if (!class_exists($controller))
+            return $actions;
+        // if (!$prototype instanceof Controller)
+        //     return $actions;
+        // get the access rules as they list the actionso the controller
+        $thisCtrl = new $controller(999);
+        $rules = $thisCtrl->accessRules();
+        foreach ($rules as $rule) {
+            if ($rule[0]==='allow')
+                $actions = array_merge($actions, $rule['actions']);
+        }
+        // sort the results
+        sort($actions);
+        // remove duplicates
+        $actions = array_unique($actions);
+        // remote the empty element
+        if (count($actions)>0 && $actions[0]==='')
+            array_shift($actions);
+
+        return $actions;
+    }
+
     /* Load all rows for the models in the list given in models.
      */
     public static function analyzeModels($models, &$faulty_rows)
@@ -50,7 +113,7 @@ class YtkUtil {
         // walk through the model and execute the sanity test
         foreach ($models as $model) {
             if (!class_exists($model)) {
-                $result.="Skipping $model; class does not exist\n";
+                $result.= "Skipping $model; class does not exist\n";
                 continue;                
             }
 
@@ -58,15 +121,15 @@ class YtkUtil {
             $prototype = new $model;
             if (!$prototype instanceof CActiveRecord)
             {
-                $result.="Skipping $model; not an CActiveRecord\n";
+                $result.= "Skipping $model; not an CActiveRecord\n";
                 continue;
             }
-            $result.=CHtml::tag('h3',array(), $model);
+            $result.=CHtml::tag('h3', array(), $model);
             $items = $model::model()->findAll();
             foreach ($items as $item) {
                 if (!$item->validate())
                 {
-                    $result.="Validate failed for item ID $item->id\n";
+                    $result.= "Validate failed for item ID $item->id\n";
                     $faulty_rows++;
                 }
             }
@@ -86,8 +149,8 @@ class YtkUtil {
     {
         return array(
             'identity' => array('id'),
-            'journaling' => array('created','changed'),
-            'naming' => array('name','desc'),
+            'journaling' => array('created', 'changed'),
+            'naming' => array('name', 'desc'),
             'ownership' => array('user_id'),
         );
     }
@@ -121,11 +184,67 @@ class YtkUtil {
             return -1;
         // compare the attributs of the scheme with those of the active record-derived class
         $res = array_intersect($scheme, array_keys($item->attributes));
-        if (count($res)==0)
+        if (count($res) == 0)
             return -1;
-        if (count($res)==count($scheme))
+        if (count($res) == count($scheme))
             return 1;
         return 0;
+    }
+
+
+    /**
+     * walk through all contoller classes, get all action names, and query each
+     * actions signature. Then draft the code for use in python unit testing
+     * listing a controllers actions against its parameters
+     * $unittest [out]: string with prepared code for be used in the python unittesting
+     *                  framework
+     * $totalActionCnt [out]: int counting the total number of actions found in all controllers
+     * @return html-formatted report on the controllers
+     */
+    static public function analyzeController($controllers, &$unittest, &$totalActionCnt) 
+    {
+        $detail = "";
+        // analyze support of schemes in all model classes
+        foreach ($controllers as $controller) {
+            // we need to skip the sitecontroller (or perhaps more elegantly the current
+            // controller) to prevent two instances of the same class
+            if ($controller === "SiteController")
+                continue;
+            $unittest.= "def test_$controller"."_views(self):\n";
+            $unittest.= "\tsite = [\n";
+            include('protected/controllers/'.$controller.".php");
+            $actions = YtkUtil::getAllActions($controller);
+            // generat output string
+            $detail.= "<b>$controller</b> with ";
+            $detail.= "#".count($actions)." action(s): ";
+            foreach ($actions as $action) {
+                $totalActionCnt++;
+                // for url generation, we need the controller name without postfix "Controller"
+                $shortname = str_replace("Controller", "", $controller);
+                $unittest.= "\t\t{'r', '$shortname/$action'";
+                    $detail.= $action."(";
+                $r = new ReflectionMethod($controller, "action".$action);
+                $params = $r->getParameters();
+                // walk through the parameters of the function and show them in the report
+                foreach ($params as $param) {
+                    // if we have a single id parameter, we generate appropriate code 
+                    // for unit testing
+                    if ($param->getName() === 'id' && count($param) === 1)
+                        $unittest.= ", 'id':self.valid_$shortname";
+                    //$param is an instance of ReflectionParameter
+                    $detail.= $param->getName();
+                    $detail.= $param->isOptional();
+                    $detail.= ", ";
+                }            
+                $unittest.= "},\n";
+                $detail.= "), ";
+            }
+            // complete the report and unittest string for this controller
+            $unittest.= "\t]\n";
+            $unittest.= "\tself.coreSiteTest(self.admin_credential, site, 200)\n\n";
+            $detail.= "<br>\n";
+        }
+        return $detail;
     }
 
 }
