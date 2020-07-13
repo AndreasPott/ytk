@@ -58,14 +58,21 @@ class Ytk extends CApplicationComponent
 	/**
 	 * Registers the chars.js JavaScript.
 	 * @param int $position the position of the JavaScript code.
+     * TODO: Now that we have started to manage more that on script code
+     *       we want to load only the required scripts; therefore, we 
+     *       need a mechanisms to request specific JS plugins to load them only when required.
 	 */
 	protected function registerJS($position = CClientScript::POS_HEAD)
 	{
-		/** @var CClientScript $cs */
-		$cs = Yii::app()->getClientScript();
+        /** @var CClientScript $cs */
+        $cs = Yii::app()->getClientScript();
         $filename = YII_DEBUG ? 'mermaid.min.js' : 'mermaid.min.js';    // exchange the first one for chart.js to have a readable version in debug mode
         Yii::log(__METHOD__." - ".$this->getAssetsUrl().'/'.$filename);
-		$cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
+        $filename = YII_DEBUG ? 'chart.min.js' : 'chart.min.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
+        $filename = YII_DEBUG ? 'chartjs-plugin-colorschemes.js' : 'chartjs-plugin-colorschemes.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
     }
     
     // public function register()
