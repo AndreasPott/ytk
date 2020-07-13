@@ -49,7 +49,6 @@ class Ytk extends CApplicationComponent
 		else
 		{
             $assetsPath = Yii::getPathOfAlias('application.extensions.ytk.assets');    // we do not receive a proper url here!
-            Yii::log(__METHOD__." - ".$assetsPath);
 			$assetsUrl = Yii::app()->assetManager->publish($assetsPath, false, -1, $this->forceCopyAssets);
 			return $this->_assetsUrl = $assetsUrl;
 		}
@@ -67,7 +66,6 @@ class Ytk extends CApplicationComponent
         /** @var CClientScript $cs */
         $cs = Yii::app()->getClientScript();
         $filename = YII_DEBUG ? 'mermaid.min.js' : 'mermaid.min.js';    // exchange the first one for chart.js to have a readable version in debug mode
-        Yii::log(__METHOD__." - ".$this->getAssetsUrl().'/'.$filename);
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
         $filename = YII_DEBUG ? 'chart.min.js' : 'chart.min.js';
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
@@ -83,7 +81,6 @@ class Ytk extends CApplicationComponent
 
 	public function init() 
 	{ 
-		Yii::log(__FILE__.": ".__METHOD__."(...)");
 		$this->registerJs(); 
 		parent::init(); 
     }
