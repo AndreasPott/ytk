@@ -6,7 +6,7 @@ Copyright (c) 2013-2020 Andreas Pott
 
 # About
 YTK is a collection of functions and widgets for the php web framework Yii (version 1.11).
-The toolkit is designed to tbe used along with the bootstrap extension of Yii.
+The toolkit is designed to tbe used along with the bootstrap extension for Yii.
 
 # Install
 Copy this project to the extensions folder of the yii projects under `protected\extensions\ytk`
@@ -60,6 +60,10 @@ The provided widgets (here `ytktile`) of the package can be used as follows:
 Functions from the namespace `Ytk` can be simply called by prefixing it with `Ytk::`
 
     echo Ytk::EncodeSuccess('myLabel');
+
+# Acknowledgement
+Ytk is shipped with a small collection of php and javascript libries under either MIT or LGPL license. As these libraries
+are exposed in the asset directory of the web projects, all thrid party code is fully available in source code. 
 
 # License
 
