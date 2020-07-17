@@ -65,12 +65,16 @@ class Ytk extends CApplicationComponent
 	{
         /** @var CClientScript $cs */
         $cs = Yii::app()->getClientScript();
-        $filename = YII_DEBUG ? 'mermaid.min.js' : 'mermaid.min.js';    // exchange the first one for chart.js to have a readable version in debug mode
+        $filename = YII_DEBUG ? 'mermaid.min.js' : 'mermaid.min.js';    
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
-        $filename = YII_DEBUG ? 'chart.min.js' : 'chart.min.js';
-        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
+        $filename = YII_DEBUG ? 'chart.min.js' : 'chart.min.js';        // exchange the first filename to chart.js to have a readable version in debug mode
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
         $filename = YII_DEBUG ? 'chartjs-plugin-colorschemes.js' : 'chartjs-plugin-colorschemes.js';
-        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
+        $filename = YII_DEBUG ? 'jspdf.min.js' : 'jspdf.min.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
+        $filename = YII_DEBUG ? 'simplemde.min.js' : 'simplemde.min.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
     }
     
     // public function register()
