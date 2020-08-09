@@ -54,38 +54,94 @@ class Ytk extends CApplicationComponent
 		}
     }
 
-	/**
-	 * Registers the chars.js JavaScript.
+    /* return an array with key-value-pairs of all supported script
+     */
+    protected function getScripts()
+    {
+        return array(
+            'mermaid'=>'registerMermaid',
+            'chartjs'=>'registerChartjs',
+            'jspdf'=>'registerJspdf',
+            'simplemde'=>'registerSimplemde',
+        );
+    }
+
+    /* register the script for the mermaid package */
+    protected function registerMermaid($position = CClientScript::POS_HEAD)
+    {
+        /** @var CClientScript $cs */
+        $cs = Yii::app()->getClientScript();
+
+        $filename = YII_DEBUG ? 'mermaid.min.js' : 'mermaid.min.js';    
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
+    }
+
+    /* register the script for the chart.js package */
+    protected function registerChartjs($position = CClientScript::POS_HEAD)
+    {
+        /** @var CClientScript $cs */
+        $cs = Yii::app()->getClientScript();
+
+        $filename = YII_DEBUG ? 'chart.min.js' : 'chart.min.js';        // exchange the first filename to chart.js to have a readable version in debug mode
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
+        $filename = YII_DEBUG ? 'chartjs-plugin-colorschemes.js' : 'chartjs-plugin-colorschemes.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
+    }
+
+    /* register the script for the jspdf package */
+    protected function registerJspdf($position = CClientScript::POS_HEAD)
+    {
+        /** @var CClientScript $cs */
+        $cs = Yii::app()->getClientScript();
+
+        $filename = YII_DEBUG ? 'jspdf.min.js' : 'jspdf.min.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
+    }
+
+    /* register the script for the simpleMDE package */
+    protected function registerSimplemde($position = CClientScript::POS_HEAD)
+    {
+        /** @var CClientScript $cs */
+        $cs = Yii::app()->getClientScript();
+
+        $filename = YII_DEBUG ? 'simplemde.min.js' : 'simplemde.min.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
+		$filename = YII_DEBUG ? 'simplemde.min.css' : 'simplemde.min.css';
+		$cs->registerCssFile($this->getAssetsUrl().'/'.$filename);        
+    }
+
+    /* Call the register method for the pacakge identified by the name $script
+     */ 
+    public function register($script)
+    {
+        $sc = $this->getScripts();
+        if (array_key_exists($script, $sc)) 
+            call_user_func(array($this, $sc[$script]));
+    }
+
+    /**
+	 * Registers all JavaScript.
 	 * @param int $position the position of the JavaScript code.
      * TODO: Now that we have started to manage more that on script code
      *       we want to load only the required scripts; therefore, we 
      *       need a mechanisms to request specific JS plugins to load them only when required.
 	 */
-	protected function registerJS($position = CClientScript::POS_HEAD)
+	protected function registerAllJS($position = CClientScript::POS_HEAD)
 	{
-        /** @var CClientScript $cs */
-        $cs = Yii::app()->getClientScript();
-        $filename = YII_DEBUG ? 'mermaid.min.js' : 'mermaid.min.js';    
-        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    // exchange '/' by a path if the files are not stored plainly in the asset dir but in subdirs
-        $filename = YII_DEBUG ? 'chart.min.js' : 'chart.min.js';        // exchange the first filename to chart.js to have a readable version in debug mode
-        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
-        $filename = YII_DEBUG ? 'chartjs-plugin-colorschemes.js' : 'chartjs-plugin-colorschemes.js';
-        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
-        $filename = YII_DEBUG ? 'jspdf.min.js' : 'jspdf.min.js';
-        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
-        $filename = YII_DEBUG ? 'simplemde.min.js' : 'simplemde.min.js';
-        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
+        $sc = $this->getScripts();
+        foreach ($sc as $script) {
+            $this->register($script);
+        }
     }
-    
-    // public function register()
-    // {
-	// 	Yii::log(__FILE__.": ".__CLASS__."::".__METHOD__."(...)");
-    //     $this->registerJS();
-    // }
 
-	public function init() 
+    /* Setting autoloadAllJs to all will load all assets shiped with ytk. Otherwise, one has to 
+     * call Yii::app()->ytk->registerX() with e.g. X=Mermaid to register the scripts one-by-one
+     */
+	public function init($autoloadAllJs=false) 
 	{ 
-		$this->registerJs(); 
+        if ($autoloadAllJs===true)
+            $this->registerAllJS(); 
+        Yii::log("autoload = $autoloadAllJs");
 		parent::init(); 
     }
     
