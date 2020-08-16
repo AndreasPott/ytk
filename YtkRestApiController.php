@@ -85,18 +85,24 @@ class YtkRestApiController extends Controller
 //         "");
 
         // Check if we have the USERNAME and PASSWORD HTTP header is set?
-        if (!(isset($_SERVER['PHP_AUTH_USER']) and isset($_SERVER['PHP_AUTH_PW']))) {
-            // Error: Unauthorized
-            $this->_sendResponse(401);
-        }
+        if (isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])) {
         $username = $_SERVER['PHP_AUTH_USER'];
         $password = $_SERVER['PHP_AUTH_PW'];
+        } 
+        // check if username and password are sent in POST variable
+        else if (isset($_POST['PHP_AUTH_USER']) && isset($_POST['PHP_AUTH_PW'])) {
+            $username = $_POST['PHP_AUTH_USER'];
+            $password = $_POST['PHP_AUTH_PW'];
+        }
+        else
+            // Error: Unauthorized
+            $this->_sendResponse(401,'Error. No credentials received');
         
         // User the UserIdentity class to perform authentification such that this implementation
         // does not have to care for user identity.
         $identity = new UserIdentity($username,$password);
         if (!$identity->authenticate())
-            $this->_sendResponse(401, 'Error: Authentification failt. User Name or password is invalid');
+            $this->_sendResponse(401, 'Error: Authentification failed. User Name or password is invalid');
     }
     
 
