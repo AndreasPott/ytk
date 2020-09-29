@@ -35,7 +35,7 @@
  * count request to the database before we load the raw data.
  * 
  */
-class YtkExport /*extends CWidget (?): widget seems meaningful, however, the content is not neccessarily html code */
+class YtkExport extends CWidget
 {
     /* the data provider object which shall be transformed */
     public $dataProvider = null; 
@@ -53,10 +53,27 @@ class YtkExport /*extends CWidget (?): widget seems meaningful, however, the con
     /* determine if column header is added to the output (if the file format allows for this) */
     public $include_header = true;
     
-
     public function init() 
     {
-        // TODO: Execute initialization of the class members based on a config array passed to this class
+        parent::init(); 
+        if ($this->dataProvider === null) { 
+            $this->dataProvider = null; 
+        }
+        if ($this->columns === null) { 
+            $this->columns = array(); 
+        }
+        if ($this->fileformat === null) { 
+            $this->fileformat = 'csv'; 
+        }     
+        if ($this->transpose === null) { 
+            $this->transpose = false; 
+        }
+        if ($this->separator === null) { 
+            $this->separator = ";"; 
+        }
+        if ($this->include_header === null) { 
+            $this->include_header = true; 
+        }                                   
     }
 
     /*
@@ -71,6 +88,7 @@ class YtkExport /*extends CWidget (?): widget seems meaningful, however, the con
         // if no columns are defined, we render all columns
         if (count($this->columns) == 0)
         {
+            // render the header for the given columns
             if (count($items) > 0 && $this->include_header == true)
             {
                 $sep = "";
@@ -82,7 +100,7 @@ class YtkExport /*extends CWidget (?): widget seems meaningful, however, the con
             }
             foreach ($items as $item) {
                 $sep = "";
-                foreach ($items[0]->attributes as $key=>$attributes) {
+                foreach ($item->attributes as $key=>$attributes) {
                     $content .= $sep.$attributes;
                     $sep = $this->separator;
                 }
@@ -123,5 +141,13 @@ class YtkExport /*extends CWidget (?): widget seems meaningful, however, the con
         
         return "";
     }
+
+    // render the widget
+    public function run() {
+        $this->dataProvider
+
+        if ($this->fileformat === 'csv')
+            echo $this->writeCsv();
+    }     
 }
 ?>
