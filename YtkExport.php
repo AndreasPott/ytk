@@ -52,6 +52,8 @@ class YtkExport extends CWidget
     public $separator = ";";
     /* determine if column header is added to the output (if the file format allows for this) */
     public $include_header = true;
+    /* the maximum number of rows that are fetched from the dataProvider */
+    public $maxSize = 1000;
     
     public function init() 
     {
@@ -73,7 +75,10 @@ class YtkExport extends CWidget
         }
         if ($this->include_header === null) { 
             $this->include_header = true; 
-        }                                   
+        }
+        if ($this->maxSize === null) {
+            $this->maxSize = 1000;
+        }
     }
 
     /* a revised version of the writeCsv function that generates a nested 
@@ -85,6 +90,8 @@ class YtkExport extends CWidget
     {
         $result = array();
 
+        // configure the number of rows that are loaded from the database
+		$this->dataProvider->getPagination()->pageSize = $this->maxSize;
         $items = $this->dataProvider->getData();
         // if no columns are defined, we render all columns
         if (count($this->columns) == 0)
@@ -174,11 +181,14 @@ class YtkExport extends CWidget
         return "";
     }
 
-    // render the widget
-    public function run() {
-
+    // render the widget with the configured data export mode
+    public function run()
+    {
+        $data = $this->transformArray();
         if ($this->fileformat === 'csv')
-            echo $this->writeCsv();
+            echo $this->writeCsvFromArray($data);
+        if ($this->fileformat === 'html')
+            echo $this->writeCsvFromArray($data);
     }     
 }
 ?>
