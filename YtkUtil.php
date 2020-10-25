@@ -24,7 +24,7 @@
 
 /**
  * YtkUtil is a collection of function to support development and consistency of
- * custom class ane dprojects
+ * custom class and projects
  */
 class YtkUtil {
 
@@ -193,7 +193,7 @@ class YtkUtil {
 
 
     /**
-     * walk through all contoller classes, get all action names, and query each
+     * walk through all controller classes, get all action names, and query each
      * actions signature. Then draft the code for use in python unit testing
      * listing a controllers actions against its parameters
      * $unittest [out]: string with prepared code for be used in the python unittesting

@@ -141,7 +141,6 @@ class Ytk extends CApplicationComponent
 	{ 
         if ($autoloadAllJs===true)
             $this->registerAllJS(); 
-        Yii::log("autoload = $autoloadAllJs");
 		parent::init(); 
     }
     
