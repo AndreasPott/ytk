@@ -55,6 +55,11 @@ class YtkExport extends CWidget
     /* the maximum number of rows that are fetched from the dataProvider */
     public $maxSize = 1000;
     
+    // helper function to clean strings
+    public static function clean($string) {
+        return preg_replace('/[^A-Za-z0-9\- ]/', '', $string); // Removes special chars.
+    }
+
     public function init() 
     {
         parent::init(); 
