@@ -57,6 +57,40 @@ class YtkUtil {
         return $controller;
     }
 
+    /* this function uses the standard yii directory structure to receive a list of all directories which
+     * contain views. No information is extract on the respective views that are contained.
+     */
+    public static function getAllViews($path='./protected/views')
+    {
+        $files = glob($path."/*", GLOB_ONLYDIR);
+        foreach ($files as &$file) {
+            $file = substr($file, strlen($path)+1);
+        }
+        return $files;
+    }
+
+    /* this function extends the getAllViews by generating a key-array list of all view directory which
+     * all its specific views
+     */
+    public static function getAllViewFiles($path='./protected/views')
+    {
+        // get all directories with view viles
+        $files = YtkUtil::getAllViews($path);
+        $res = array();
+        foreach ($files as $file) {
+            // get all files in these directories
+            $viewfiles = glob($path."/$file/*.php");
+            $views = array();
+            // clean the filename from path and file extensions
+            foreach ($viewfiles as $vf) {
+                array_push($views, basename($vf, '.php'));
+            }
+            // store search results in nested array 
+            $res[$file] = $views;
+        }
+        return $res;
+    }
+
     /**
      * Extracta all actions implemented by the controller class, i.e. the name of all functions which
      * name starts with the prefix 'action'.
@@ -124,6 +158,8 @@ class YtkUtil {
                 $result.= "Skipping $model; not an CActiveRecord\n";
                 continue;
             }
+
+            // execute actual validation
             $result.=CHtml::tag('h3', array(), $model);
             $items = $model::model()->findAll();
             foreach ($items as $item) {
@@ -135,7 +171,7 @@ class YtkUtil {
             }
         }
         return $result;
-    }
+    }  
     
     /* the proposal for schemes definitions
      * the *identity* scheme simply required that a model implements the attribute id as primary key, thus allowing to identify items in the tables in a unique way
