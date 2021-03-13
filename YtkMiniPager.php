@@ -23,14 +23,31 @@
 */
 
 /**
- * YtkMiniPager is a button group that allows to navigate forth and back 
+ * YtkMiniPager is a button group that allows to navigate forth and back implementing a 
+ * next/previous logic. If a proper filter is configured, only a subset of the items
+ * in the table are reached. Filtes must be valid SQL WHERE expressions.
+ * By setting link
  */
 class YtkMiniPager extends CWidget { 
-    public $model;             // the name as string of the model class derived from CActiveRecord
-    public $item;              // a model instance derived from CActiveRecord. The model must implment an attribute named id
-    public $url;               // the url to call when the button is clicked; the url must accept a GET parameter named id to pass the id of the element
-    public $filter;            // optional parameter: additional condition to filter for when determining next, prev, total index, and total item count
-    public $links;             // optional parameter: mixed | boolean or array: show direkt link options as dropdown on the middle button
+    // the name as string of the model class derived from CActiveRecord on which we navigate
+    public $model;             
+
+    // a model instance derived from CActiveRecord. The model must implment an attribute 
+    // named id; pass the current model in a typical item view scenario
+    public $item;              
+    
+    // the url to call when the button is clicked; the url must accept a GET parameter 
+    // named id to pass the id of the element
+    public $url;               
+
+    // optional parameter: additional condition to filter for when determining next, 
+    // prev, total index, and total item count
+    public $filter;            
+    
+    // optional parameter: mixed | boolean or array: show direkt link options as dropdown 
+    // on the middle button
+    public $links;             
+
 
     // assign default values for unset attributes
     public function init() { 
@@ -68,7 +85,7 @@ class YtkMiniPager extends CWidget {
         $idx = $model::model()->count(array(
             'condition'=>$this->filter.' AND id <= '.$this->item->id));
 
-        // generate the buttons for prev, indexpos, and next        
+        // generate the optional links of the dropdown menu
         $dirLinks = array();
         if ($this->links === true) {
             $res = CHtml::listData($model::model()->findAll(array('condition'=>$this->filter)), 'id', 'name');
@@ -76,13 +93,13 @@ class YtkMiniPager extends CWidget {
                 $dirLinks[] = array('label'=>$name, 'url'=>array($this->url, 'id'=>$id));
         }
 
+        // generate all three buttons as a button group
         $this->widget('bootstrap.widgets.TbButtonGroup', array(
             'size'=>'normal', // null, 'large', 'small' or 'mini'
             'type'=>'null', // null, 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'	
             'buttons'=>array(
                 array('icon'=>'chevron-left', 'label'=>' ', 'url'=>$prev_id>0 ? array($this->url, 'id'=>$prev_id) : '#', 'active'=>$prev_id == 0,),
                 array('label'=>$idx.' / '.$cnt, 'size'=>'small', 'url'=>'#', 'active'=>true, 'items'=>$dirLinks,),
-                // array('label'=>'Down', 
                 array('icon'=>'chevron-right', 'label'=>' ', 'url'=>$next_id>0 ? array($this->url, 'id'=>$next_id) : '#', 'active'=>$next_id == 0,),
             ),
         ));        
