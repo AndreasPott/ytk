@@ -1,7 +1,7 @@
 <?php 
 /* Ytk - Yii Toolkit
 *
-* Copyright (c) 2013-2020 Andreas Pott
+* Copyright (c) 2013-2021 Andreas Pott
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ class YtkMiniPager extends CWidget {
     public $item;              // a model instance derived from CActiveRecord. The model must implment an attribute named id
     public $url;               // the url to call when the button is clicked; the url must accept a GET parameter named id to pass the id of the element
     public $filter;            // optional parameter: additional condition to filter for when determining next, prev, total index, and total item count
+    public $links;             // optional parameter: mixed | boolean or array: show direkt link options as dropdown on the middle button
 
     // assign default values for unset attributes
     public function init() { 
@@ -41,7 +42,9 @@ class YtkMiniPager extends CWidget {
             $this->filter = 'TRUE';     // if we have no specific filter condition we use TRUE as 
                                         // this condition works both as placeholder in empty 
                                         /// condition and as optional condition with AND 
-    } 
+        if ($this->links === null)
+            $this->links = false;     
+        } 
 
     // render the widget by using echo to print the desired content
     public function run() {
@@ -65,25 +68,24 @@ class YtkMiniPager extends CWidget {
         $idx = $model::model()->count(array(
             'condition'=>$this->filter.' AND id <= '.$this->item->id));
 
-        // generate the buttons for prev, indexpos, and next
-        $this->widget('bootstrap.widgets.TbButton', array(
-            'icon'=>'chevron-left',
-            'url'=>$prev_id>0 ? array($this->url, 'id'=>$prev_id) : '#',
-            'active'=>$prev_id == 0,
-        ));
+        // generate the buttons for prev, indexpos, and next        
+        $dirLinks = array();
+        if ($this->links === true) {
+            $res = CHtml::listData($model::model()->findAll(array('condition'=>$this->filter)), 'id', 'name');
+            foreach ($res as $id=>$name)
+                $dirLinks[] = array('label'=>$name, 'url'=>array($this->url, 'id'=>$id));
+        }
 
-        $this->widget('bootstrap.widgets.TbButton', array(
-            'label'=>$idx.' / '.$cnt,
-            'size'=>'small',
-            'url'=>'#',
-            'active'=>true,
-        ));
-
-        $this->widget('bootstrap.widgets.TbButton', array(
-            'icon'=>'chevron-right',
-            'url'=>$next_id>0 ? array($this->url, 'id'=>$next_id) : '#',
-            'active'=>$next_id == 0,
-        ));      
+        $this->widget('bootstrap.widgets.TbButtonGroup', array(
+            'size'=>'normal', // null, 'large', 'small' or 'mini'
+            'type'=>'null', // null, 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'	
+            'buttons'=>array(
+                array('icon'=>'chevron-left', 'label'=>' ', 'url'=>$prev_id>0 ? array($this->url, 'id'=>$prev_id) : '#', 'active'=>$prev_id == 0,),
+                array('label'=>$idx.' / '.$cnt, 'size'=>'small', 'url'=>'#', 'active'=>true, 'items'=>$dirLinks,),
+                // array('label'=>'Down', 
+                array('icon'=>'chevron-right', 'label'=>' ', 'url'=>$next_id>0 ? array($this->url, 'id'=>$next_id) : '#', 'active'=>$next_id == 0,),
+            ),
+        ));        
         echo '</div>';
     } 
 } 
