@@ -299,6 +299,21 @@ class Ytk extends CApplicationComponent
     {
         echo CHtml::tag($tag, array(), print_r($item, true));
     }
+
+    /**
+     * Register a script to toggle on click the size of HTML elements with a given class
+     * @param $cssClass the html class name to which the toggle function is registered
+     * @param $context The jQuery selector of the top html which childs shall receive the toggle 
+     *        property; can be "body". The element must have the maxHeight css attribute (e.g. div tags)
+     * @param $minSize the (limited) size of the element
+     * @param $maxSize the alternative size as second state, usually the inital value
+     */
+    public static function sizeToggler($cssClass, $context='body',  $minSize='250px', $maxSize='none') {
+        Yii::app()->clientScript->registerScript('ajax-link-handler', "
+        jQuery('$context').on('click', '.$cssClass', function() {
+            this.style.maxHeight = this.style.maxHeight != '$maxSize' ? '$maxSize' : '$minSize';
+        });");
+    }
 }
 
 ?>
