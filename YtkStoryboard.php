@@ -167,7 +167,6 @@ class StoryBoard extends CActiveRecord
     public function defaultScope()
     {
         return array(
-            // 'condition'=>"language='".Yii::app()->language."'",
             'order'=>'sequence ASC',
         );
     }
@@ -261,7 +260,8 @@ class YtkStoryboard
      */
     public function renderEditWidget($controller) {
         $dataProvider = new CActiveDataProvider('Storyboard');
-        echo CHtml::beginForm(); 
+        $link = array($this->configController, 'view'=>$this->configView);
+        echo CHtml::beginForm($link); 
         $controller->widget('bootstrap.widgets.TbGridView', array(
             'dataProvider'=>$dataProvider,
             'columns'=>array(
@@ -290,6 +290,21 @@ class YtkStoryboard
                         echo CHtml::textField("Storyboard[$data->storyboard_id][sequence]", $data->sequence, array('class'=>'span1'));
                     }
                 ),
+                array(
+                    'name'=>'Operations',
+                    'value'=>function($data) use($link) {
+                        echo CHtml::ajaxLink(
+                            CHtml::tag('i', array('class'=>'icon-trash'), ''),
+                            $link,
+                            array(
+                                'type' => 'POST',
+                                'data' => array('id'=>$data->storyboard_id, 'cmd'=>'delete'),
+                                // reload the page after processing the request; this is not very efficient but works fine
+                                'success' => 'function(response) { window.location = "'.Yii::app()->createUrl($link[0]).'"}',
+                            )
+                        );
+                    }
+                )
             )
         )); 
         // add a submit button 
@@ -309,37 +324,43 @@ class YtkStoryboard
         // Menu generation: Create only three entries: Current, previous, and next item
         // therefore, we need to search the neighbouring instances
         $storyboard = Storyboard::model()->findAllByAttributes(array('story_id'=>$this->currentStory), array('order'=>'sequence ASC'));
-        $storyboardid = isset($_GET['storyboardid']) ? $_GET['storyboardid'] : $storyboard[0]->storyboard_id;
+        if (count($storyboard) > 0)
+            $storyboardid = isset($_GET['storyboardid']) ? $_GET['storyboardid'] : $storyboard[0]->storyboard_id;
+        else
+            $storyboardid = 0;
         // determine the length of the story and our current position
         $current = Storyboard::model()->findByPk($storyboardid);
-        $length = count($this->sb);
-        $pos = Storyboard::model()->count(array('order'=>'sequence DESC', 'condition'=>"story_ID = $this->currentStory && sequence <= $current->sequence"));
-        // determine the previous entry
-        $prev = Storyboard::model()->find(array('order'=>'sequence DESC', 'condition'=>"story_ID = $this->currentStory && sequence < $current->sequence"));
-        if ($prev) {
-            $buttons[] = array('label'=>"Back", 'icon'=>'chevron-left', 'url'=>array_merge(json_decode($prev->url, true), array('storyboardid'=>$prev->storyboard_id)));
-        } else
-            $buttons[] = array('label'=>"Back", 'icon'=>'chevron-left', 'url'=>'#', 'disabled'=>'disabled');
-        // determine the next entry
-        $next = Storyboard::model()->find(array('order'=>'sequence ASC', 'condition'=>"story_ID = $this->currentStory && sequence > $current->sequence"));
-        if ($next) {
-            $buttons[] = array('label'=>"Next", 'icon'=>'chevron-right', 'url'=>array_merge(json_decode($next->url, true), array('storyboardid'=>$next->storyboard_id)));
-        } else
-            $buttons[] = array('label'=>"Next", 'icon'=>'chevron-right', 'url'=>'#', 'disabled'=>'disabled');
+        if (isset($current)) {
 
-        // render button for current slide
-        $buttons[] = array('label'=>$current->title." ($pos/$length)", 'url'=>'#');
-        $i=1;
-        foreach ($this->sb as $page) {
-            // limit the number of pages to seven and show and ellipse if there are more pages
-            $buttons2[] = array('label'=>"$i -- $page->title", 'url'=>array_merge(json_decode($page->url, true), array('storyboardid'=>$page->storyboard_id)));
-            if ($i++ > 25) {
-                $buttons2[] = array('label'=>'...', 'url'=>'#', 'disabled'=>'disabled');
-                break;
+            $length = count($this->sb);
+            $pos = Storyboard::model()->count(array('order'=>'sequence DESC', 'condition'=>"story_ID = $this->currentStory && sequence <= $current->sequence"));
+            // determine the previous entry
+            $prev = Storyboard::model()->find(array('order'=>'sequence DESC', 'condition'=>"story_ID = $this->currentStory && sequence < $current->sequence"));
+            if ($prev) {
+                $buttons[] = array('label'=>"Back", 'icon'=>'chevron-left', 'url'=>array_merge(json_decode($prev->url, true), array('storyboardid'=>$prev->storyboard_id)));
+            } else
+                $buttons[] = array('label'=>"Back", 'icon'=>'chevron-left', 'url'=>'#', 'disabled'=>'disabled');
+            // determine the next entry
+            $next = Storyboard::model()->find(array('order'=>'sequence ASC', 'condition'=>"story_ID = $this->currentStory && sequence > $current->sequence"));
+            if ($next) {
+                $buttons[] = array('label'=>"Next", 'icon'=>'chevron-right', 'url'=>array_merge(json_decode($next->url, true), array('storyboardid'=>$next->storyboard_id)));
+            } else
+                $buttons[] = array('label'=>"Next", 'icon'=>'chevron-right', 'url'=>'#', 'disabled'=>'disabled');
+
+            // render button for current slide
+            $buttons[] = array('label'=>$current->title." ($pos/$length)", 'url'=>array_merge(json_decode($current->url, true), array('storyboardid'=>$current->storyboard_id)));
+            $i = 1;
+            foreach ($this->sb as $page) {
+                // limit the number of pages to seven and show and ellipse if there are more pages
+                $buttons2[] = array('label'=>"$i -- $page->title", 'url'=>array_merge(json_decode($page->url, true), array('storyboardid'=>$page->storyboard_id)));
+                if ($i++ > 25) {
+                    $buttons2[] = array('label'=>'...', 'url'=>'#', 'disabled'=>'disabled');
+                    break;
+                }
             }
+            // add the buttons with the slide names as submenu at the end of the menu bar
+            $buttons[] = array('label'=>'Pages', 'items'=>$buttons2);
         }
-        // add the buttons with the slide names as submenu at the end of the menu bar
-        $buttons[] = array('label'=>'Pages', 'items'=>$buttons2);
 
         Yii::app()->getController()->widget('bootstrap.widgets.TbNavbar', array(
 			'brand'=>'Exit',       // <- exh
@@ -361,7 +382,7 @@ class YtkStoryboard
 		foreach ($this->sb as $page) {
 			if (isset($_GET['storyboardid']) && $_GET['storyboardid'] == $page->storyboard_id) {
 				$md = new CMarkdown;
-				echo CHtml::tag('div', array('class'=>'box'), CHtml::tag('h1',array(), $page->title).$md->transform($page->text));
+				echo CHtml::tag('div', array('class'=>'box'), CHtml::tag('h1', array(), $page->title).$md->transform($page->text));
 				break;
 			}
 		}        
@@ -388,36 +409,40 @@ class YtkStoryboard
      * The eventHander must be in the same file
      */
     public function renderLinks() {
-        $form=Yii::app()->getController()->beginWidget('bootstrap.widgets.TbActiveForm', array(
+        $ctrl = Yii::app()->getController();
+        $form = $ctrl->beginWidget('bootstrap.widgets.TbActiveForm', array(
             'id'=>'npc-form',
             'enableAjaxValidation'=>false,
             'type'=>'horizontal',
-        )); 
+            'action'=>array($this->configController, 'view'=>$this->configView),
+        ));
+        // add teh control links for start/stop/reset
         $htmlOpts = array('class'=>'btn');
         echo CHtml::link('Start', array($this->configController, 'view'=>$this->configView, 'cmd'=>'start'), $htmlOpts)." ";
         echo CHtml::link('End',   array($this->configController, 'view'=>$this->configView, 'cmd'=>'end'), $htmlOpts)." ";
         echo CHtml::link('Reset', array($this->configController, 'view'=>$this->configView, 'cmd'=>'reset'), $htmlOpts);
         echo "&nbsp;";
+        // create the cotrol to select and change story ID
         $stories = CHtml::listData(Storyboard::model()->findAll(array(
             'distinct'=>false,	// remove double entries from the list
         )), 'story_id','story_id');
-        echo "Stories: ".CHtml::dropDownList('story_id',$this->currentStory, $stories,array('class'=>'span1'));        
-        Yii::app()->getController()->widget('bootstrap.widgets.TbButton', array(
+        echo "Stories: ".CHtml::dropDownList('story_id',$this->currentStory, $stories, array('class'=>'span1'));        
+        $ctrl->widget('bootstrap.widgets.TbButton', array(
             'buttonType'=>'submit',
             'label'=>'Set Story',
-        )); 
-        Yii::app()->getController()->widget('bootstrap.widgets.TbButton', array(
+        ));
+        $ctrl->widget('bootstrap.widgets.TbButton', array(
             'buttonType'=>'submit',
             // add custom POST parameters
             'label'=>'Renumber Story',
             // this sets the parameter $_POST['renumber'] such that isset(_POST['renumber]) is true afterwards
             'htmlOptions'=>array('name'=>'renumber'),
-        )); 
-        Yii::app()->getController()->endWidget();
+        ));
+        $ctrl->endWidget();
     }
 
     /**
-     * Handle the commands passed to the class via get variables in GET[cmd]
+     * Handle the commands passed to the class via get and post variables in GET[cmd]
      */
     public function eventHandler() {
         // reset the story board data structure to default values
@@ -454,12 +479,20 @@ class YtkStoryboard
             $storyboard->title = $_GET['title'];
             $storyboard->text = "";
             $storyboard->url = json_encode($url);
-            $storyboard->sequence = $lastItem->storyboard_id+1;
+            $storyboard->sequence = isset($lastItem) ? $lastItem->storyboard_id+1 : 1;
             $storyboard->settings = "";
             $storyboard->save();
         }
-
-        // the renumber command loads all elements of a given story and assigs increasing sequence numbers
+        
+        // handle the request for deleting an item; delete request must be submitte by POST requests
+        if (isset($_POST['cmd']) && $_POST['cmd'] == 'delete') {
+            if (isset($_POST['id']))
+                $item = Storyboard::model()->findByPk($_POST['id']);
+            if (isset($item)) {
+                $item->delete();
+            }            
+        }
+            // the renumber command loads all elements of a given story and assigs increasing sequence numbers
         if (isset($_POST['renumber']) && isset($_POST['story_id']))
         {
             $items = Storyboard::model()->findAllByAttributes(array('story_id'=>$_POST['story_id']), array('order'=>'sequence ASC'));
