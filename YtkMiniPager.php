@@ -25,19 +25,22 @@
 /**
  * YtkMiniPager is a button group that allows to navigate forth and back implementing a 
  * next/previous logic. If a proper filter is configured, only a subset of the items
- * in the table are reached. Filtes must be valid SQL WHERE expressions.
- * By setting link
+ * in the table model are reached. Filters must be valid SQL WHERE expressions as string.
+ * By setting link to true, one can list all items as dropdown jump list in the middle button.
  */
 class YtkMiniPager extends CWidget { 
     // the name as string of the model class derived from CActiveRecord on which we navigate
     public $model;
 
-    // a model instance derived from CActiveRecord. The model must implment an attribute 
-    // named id; pass the current model in a typical item view scenario
+    // a model instance derived from CActiveRecord. The model must implement a primary key 
+    // named id or return a respective items using tableSchema->primaryKey; 
+    // pass the current model in a typical item view scenario
     public $item;
 
-    // the url to call when the button is clicked; the url must accept a GET parameter 
-    // named id to pass the id of the element
+    // the url to call when the forward/backward button is clicked; the url must accept 
+    // a GET parameter named 'id' to pass the primary key of the element. According to yii
+    // standard behavior, the parameter is named id even if the primary keys name differs
+    // (e.g. "modelname_id")
     public $url;
 
     // the size of the minipages as passed to TbButtonGroup control. Defaults to size 'normal'
@@ -65,17 +68,15 @@ class YtkMiniPager extends CWidget {
             $this->buttonSize = 'normal';
         if ($this->filter === null)
             $this->filter = 'TRUE';     // if we have no specific filter condition we use TRUE as 
-                                        // this condition works both as placeholder in empty 
-                                        /// condition and as optional condition with AND 
+                                        // this condition works both as placeholder to model no
+                                        // condition that can be postfixed with an AND 
         if ($this->links === null)
             $this->links = false;
         // if no name for primary key (used for nagivation forth and back) is given, load the 
         // primary key from the model
         if ($this->pk === null)
             $this->pk = $this->item->tableSchema->primaryKey; // ?? "id";
-            // $attributeNames = $this->item->attributeNames();
-            // $this->pk = $attributeNames[0];
-        } 
+    } 
 
     // render the widget by using echo to print the desired content
     public function run() {
@@ -95,7 +96,7 @@ class YtkMiniPager extends CWidget {
             'order'=>"$pk DESC"));
         $prev_id = count($res)>0 ? $res[0]->$pk : 0;
 
-        // get index number and total count of fow handouts
+        // get index number and total count of items
         $cnt = $model::model()->count(array(
             'condition'=>$this->filter));
         $idx = $model::model()->count(array(
