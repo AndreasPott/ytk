@@ -51,6 +51,8 @@ class YtkMiniPager extends CWidget {
     // on the middle button
     public $links;
 
+    // name of the primary key attribute in $model
+    public $pk;
 
     // assign default values for unset attributes
     public function init() {
@@ -67,36 +69,44 @@ class YtkMiniPager extends CWidget {
                                         /// condition and as optional condition with AND 
         if ($this->links === null)
             $this->links = false;
+        // if no name for primary key (used for nagivation forth and back) is given, load the 
+        // primary key from the model
+        if ($this->pk === null)
+            $this->pk = $this->item->tableSchema->primaryKey; // ?? "id";
+            // $attributeNames = $this->item->attributeNames();
+            // $this->pk = $attributeNames[0];
         } 
 
     // render the widget by using echo to print the desired content
     public function run() {
         echo '<div class="pull-right">';
         $model = $this->model;
+        $pk = $this->pk;
 
         // find the next model after the current one
         $res = $model::model()->findAll(array(
-            'condition'=>$this->filter.' AND id > '.$this->item->id));
-        $next_id = count($res)>0 ? $res[0]->id : 0;
+            'condition'=>$this->filter." AND $pk > ".$this->item->$pk,
+            'order'=>"$pk ASC"));
+        $next_id = count($res)>0 ? $res[0]->$pk : 0;
 
         // find previous model before the current one
         $res = $model::model()->findAll(array(
-            'condition'=>$this->filter.' AND id < '.$this->item->id,
-            'order'=>'id DESC'));
-        $prev_id = count($res)>0 ? $res[0]->id : 0;
+            'condition'=>$this->filter." AND $pk < ".$this->item->$pk,
+            'order'=>"$pk DESC"));
+        $prev_id = count($res)>0 ? $res[0]->$pk : 0;
 
         // get index number and total count of fow handouts
         $cnt = $model::model()->count(array(
             'condition'=>$this->filter));
         $idx = $model::model()->count(array(
-            'condition'=>$this->filter.' AND id <= '.$this->item->id));
+            'condition'=>$this->filter." AND $this->pk <= ".$this->item->$pk));
 
         // generate the optional links of the dropdown menu
         $dirLinks = array();
         if ($this->links === true) {
-            $res = CHtml::listData($model::model()->findAll(array('condition'=>$this->filter)), 'id', 'name');
+            $res = CHtml::listData($model::model()->findAll(array('condition'=>$this->filter)), "$pk", 'name');
             foreach ($res as $id=>$name)
-                $dirLinks[] = array('label'=>$name, 'url'=>array($this->url, 'id'=>$id));
+                $dirLinks[] = array('label'=>$name, 'url'=>array($this->url, "$pk"=>$id));
         }
 
         // generate all three buttons as a button group
@@ -104,9 +114,9 @@ class YtkMiniPager extends CWidget {
             'size'=>$this->buttonSize, // null, 'large', 'small' or 'mini'
             'type'=>'null', // null, 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'	
             'buttons'=>array(
-                array('icon'=>'chevron-left', 'label'=>' ', 'url'=>$prev_id>0 ? array($this->url, 'id'=>$prev_id) : '#', 'active'=>$prev_id == 0,),
+                array('icon'=>'chevron-left', 'label'=>' ', 'url'=>$prev_id>0 ? array($this->url, "id"=>$prev_id) : '#', 'active'=>$prev_id == 0,),
                 array('label'=>$idx.' / '.$cnt, 'size'=>'small', 'url'=>'#', 'active'=>true, 'items'=>$dirLinks,),
-                array('icon'=>'chevron-right', 'label'=>' ', 'url'=>$next_id>0 ? array($this->url, 'id'=>$next_id) : '#', 'active'=>$next_id == 0,),
+                array('icon'=>'chevron-right', 'label'=>' ', 'url'=>$next_id>0 ? array($this->url, "id"=>$next_id) : '#', 'active'=>$next_id == 0,),
             ),
         ));
         echo '</div>';
