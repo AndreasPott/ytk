@@ -44,10 +44,13 @@ class YtkMiniPager extends CWidget {
     public $url;
 
     // the size of the minipages as passed to TbButtonGroup control. Defaults to size 'normal'
+    // Other options are 'large', 'small' or 'mini'
     public $buttonSize;
 
     // optional parameter: additional condition to filter for when determining next, 
-    // prev, total index, and total item count
+    // prev, total index, and total item count. Defaults to value TRUE as this 
+    // condition works both as placeholder to select all models by default and
+    // can be postfixed with any AND-condition
     public $filter;
 
     // optional parameter: mixed | boolean or array: show direkt link options as dropdown 
@@ -67,15 +70,13 @@ class YtkMiniPager extends CWidget {
         if ($this->buttonSize === null)
             $this->buttonSize = 'normal';
         if ($this->filter === null)
-            $this->filter = 'TRUE';     // if we have no specific filter condition we use TRUE as 
-                                        // this condition works both as placeholder to model no
-                                        // condition that can be postfixed with an AND 
+            $this->filter = 'TRUE';     
         if ($this->links === null)
             $this->links = false;
         // if no name for primary key (used for nagivation forth and back) is given, load the 
         // primary key from the model
         if ($this->pk === null)
-            $this->pk = $this->item->tableSchema->primaryKey; // ?? "id";
+            $this->pk = $this->item->tableSchema->primaryKey;
     } 
 
     // render the widget by using echo to print the desired content
@@ -87,13 +88,15 @@ class YtkMiniPager extends CWidget {
         // find the next model after the current one
         $res = $model::model()->findAll(array(
             'condition'=>$this->filter." AND $pk > ".$this->item->$pk,
-            'order'=>"$pk ASC"));
+            'order'=>"$pk ASC",
+            'limit'=>1));
         $next_id = count($res)>0 ? $res[0]->$pk : 0;
 
         // find previous model before the current one
         $res = $model::model()->findAll(array(
             'condition'=>$this->filter." AND $pk < ".$this->item->$pk,
-            'order'=>"$pk DESC"));
+            'order'=>"$pk DESC",
+            'limit'=>1));
         $prev_id = count($res)>0 ? $res[0]->$pk : 0;
 
         // get index number and total count of items
@@ -112,8 +115,8 @@ class YtkMiniPager extends CWidget {
 
         // generate all three buttons as a button group
         $this->widget('bootstrap.widgets.TbButtonGroup', array(
-            'size'=>$this->buttonSize, // null, 'large', 'small' or 'mini'
-            'type'=>'null', // null, 'primary', 'info', 'success', 'warning', 'danger' or 'inverse'	
+            'size'=>$this->buttonSize,
+            'type'=>'null',
             'buttons'=>array(
                 array('icon'=>'chevron-left', 'label'=>' ', 'url'=>$prev_id>0 ? array($this->url, "id"=>$prev_id) : '#', 'active'=>$prev_id == 0,),
                 array('label'=>$idx.' / '.$cnt, 'size'=>'small', 'url'=>'#', 'active'=>true, 'items'=>$dirLinks,),

@@ -165,7 +165,8 @@ class YtkUtil {
             foreach ($items as $item) {
                 if (!$item->validate())
                 {
-                    $result.= "Validate failed for item ID $item->id\n";
+                    $result.= "Validate failed for item ID $item->id. Found ".
+                        count($item->getErrors())." validation errors\n".print_r($item->getErrors(), true)."\n";
                     $faulty_rows++;
                 }
             }
