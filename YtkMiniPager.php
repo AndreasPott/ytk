@@ -60,6 +60,10 @@ class YtkMiniPager extends CWidget {
     // name of the primary key attribute in $model
     public $pk;
 
+    // optional parameter to be forwarded to the underlying button group widget
+    // to customize style and setting classes
+    public $htmlOptions;
+
     // assign default values for unset attributes
     public function init() {
         parent::init(); 
@@ -73,10 +77,12 @@ class YtkMiniPager extends CWidget {
             $this->filter = 'TRUE';     
         if ($this->links === null)
             $this->links = false;
-        // if no name for primary key (used for nagivation forth and back) is given, load the 
+        // if no name for primary key (used for navigation forth and back) is given, load the 
         // primary key from the model
         if ($this->pk === null)
             $this->pk = $this->item->tableSchema->primaryKey;
+        if ($this->htmlOptions === null)
+            $this->htmlOptions = array();
     } 
 
     // render the widget by using echo to print the desired content
@@ -117,6 +123,7 @@ class YtkMiniPager extends CWidget {
         $this->widget('bootstrap.widgets.TbButtonGroup', array(
             'size'=>$this->buttonSize,
             'type'=>'null',
+            'htmlOptions'=>$this->htmlOptions,
             'buttons'=>array(
                 array('icon'=>'chevron-left', 'label'=>' ', 'url'=>$prev_id>0 ? array($this->url, "id"=>$prev_id) : '#', 'active'=>$prev_id == 0,),
                 array('label'=>$idx.' / '.$cnt, 'size'=>'small', 'url'=>'#', 'active'=>true, 'items'=>$dirLinks,),
