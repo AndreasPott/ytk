@@ -1,7 +1,7 @@
 <?php
 /* Ytk - Yii Toolkit
 *
-* Copyright (c) 2013-2020 Andreas Pott
+* Copyright (c) 2013-2021 Andreas Pott
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -54,10 +54,19 @@ class YtkExport extends CWidget
     public $include_header = true;
     /* the maximum number of rows that are fetched from the dataProvider */
     public $maxSize = 1000;
+    /* configure if string purification is applied during array transformation */
+    public $purify = true;
+    /* if set to true,  active records will be excluded from export if validation is not successfuly */
+    public $validateRecords = false;
     
-    // helper function to clean strings
-    public static function clean($string) {
-        return preg_replace('/[^A-Za-z0-9\- ]/', '', $string); // Removes special chars.
+    // helper function to clean strings removing a list of special chars
+    // that might cause problems in target file
+    public function clean($string) {
+        // we must not have the csv separator char (default semicolon ";" ) in the exported strings
+        if ($this->separator==";" && $this->fileformat == 'csv')
+            return preg_replace("/[^a-zA-Z0-9 ()%:\-\+@.\/]/", "", $string);
+        else
+            return preg_replace("/[^a-zA-Z0-9 ()%:;\-\+@.\/]/", "", $string);
     }
 
     public function init() 
@@ -98,40 +107,49 @@ class YtkExport extends CWidget
         // configure the number of rows that are loaded from the database
 		$this->dataProvider->getPagination()->pageSize = $this->maxSize;
         $items = $this->dataProvider->getData();
-        // if no columns are defined, we render all columns
-        if (count($this->columns) == 0)
-        {
-            // render the header for the given columns
-            if (count($items) > 0 && $this->include_header == true)
-            {
-                $header = array();
-                foreach ($items[0]->attributes as $key=>$attributes)
-                    array_push($header, $key);
-                array_push($result, $header);
-            }
-            foreach ($items as $item) {
-                $line = array();
-                foreach ($item->attributes as $key=>$attributes) 
-                    array_push($line, $attributes);
-                array_push($result, $line);                
-            }
-        } else {
-            // render only the columns defined by the array $columns
-            if (count($items) > 0 && $this->include_header == true)
-            {
-                // @TODO: Reconsider if we want to check already here if the columns exist?
-                $header = array();
-                foreach ($this->columns as $columns) 
-                    array_push($header, $columns);
-                array_push($result, $header);               
-            }
-            foreach ($items as $item) {
-                $line = array();
-                foreach ($this->columns as $columns) 
-                    array_push($line, CHtml::value($item,$columns,""));
-                array_push($result, $line);                
-            }
+        
+        // search for wildcards "*"
+        $insertpos = -1;
+        foreach ($this->columns as $pos=>$column) {
+            if ($column == "*")
+                $insertpos = $pos;
         }
+        if ($insertpos >= 0) {
+            array_splice($this->columns, $insertpos, 1, array_keys( $items[0]->attributes) );
+        }
+        // if no attributes are given, we use all by default
+        if (count($this->columns) == 0) {
+            $this->columns = array_keys( $items[0]->attributes);
+        }
+
+        // render only the columns defined by the array $columns
+        if (count($items) > 0 && $this->include_header == true)
+        {
+            // @TODO: Reconsider if we want to check already here if the columns exist?
+            $header = array();
+            foreach ($this->columns as $columns) 
+                array_push($header, $columns);
+            array_push($result, $header);               
+        }
+
+        foreach ($items as $item) {
+            if ($this->validateRecords && !$item->validate()) {
+                echo "ERROR: Validation failed. Skipping this record $item->id\n";
+            }
+            $line = array();
+            foreach ($this->columns as $columns) {
+                $value = CHtml::value($item,$columns,"");
+                // this handles a nasty bug in ExcelExport
+                if ($value == "0000-00-00")
+                    $value = "";
+                if ($this->purify) {
+                    $value = $this->clean($value);
+                }
+                array_push($line, $value);
+            }
+            array_push($result, $line);                
+        }
+    
         return $result;
     }
 
