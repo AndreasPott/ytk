@@ -2,7 +2,7 @@
     "name": "aspott/ytk",
     "description": "YTK - A Yii Toolkit",
     "archive": {
-        "name": ["xdev.md", ".gitignore"]
+        "exclude": ["xdev.md", ".gitignore"]
     },
     "authors": [
         {
