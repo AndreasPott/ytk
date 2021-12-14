@@ -1,5 +1,5 @@
 # YTK - Yii Toolkit
-> Version 1.0, 28. June, 2020
+> Version 1.0.2, 14. December, 2021
 
                       ___           ,-.  
             ,---,   ,--.'|_     ,--/-/|  
@@ -16,7 +16,7 @@
             `--`  Y i i  T o o l k i t 
                                         
 
-Copyright (c) 2013-2020 Andreas Pott
+Copyright (c) 2013-2021 Andreas Pott
 
 # About
 YTK is a collection of functions and widgets for the php web framework Yii (version 1.11).
@@ -24,6 +24,9 @@ The toolkit is designed to to be used along with the bootstrap extension for Yii
 
 # Install
 Copy this project to the extensions folder of the yii projects under `protected\extensions\ytk`
+
+# Install using composer
+ytk can be installed using composer from packagist as `"require": "aspott/ytk"`
 
 # Configure 
 To use the widgets, register ytk for autoloading in the file `protected\config\main.php` with the

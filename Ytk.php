@@ -1,7 +1,7 @@
 <?php
 /* Ytk - Yii Toolkit
 *
-* Copyright (c) 2013-2020 Andreas Pott
+* Copyright (c) 2013-2021 Andreas Pott
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ class Ytk extends CApplicationComponent
 			return $this->_assetsUrl;
 		else
 		{
-            $assetsPath = Yii::getPathOfAlias('application.extensions.ytk.assets');    // we do not receive a proper url here!
+            $assetsPath = Yii::getPathOfAlias('ytk.assets');    // we do not receive a proper url here!
 			$assetsUrl = Yii::app()->assetManager->publish($assetsPath, false, -1, $this->forceCopyAssets);
 			return $this->_assetsUrl = $assetsUrl;
 		}
