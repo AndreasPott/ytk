@@ -1,7 +1,7 @@
 <?php
 /* Ytk - Yii Toolkit
 *
-* Copyright (c) 2013-2021 Andreas Pott
+* Copyright (c) 2013-2022 Andreas Pott
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -86,6 +86,12 @@ class Ytk extends CApplicationComponent
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
         $filename = YII_DEBUG ? 'chartjs-plugin-colorschemes.js' : 'chartjs-plugin-colorschemes.js';
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
+        $filename = YII_DEBUG ? 'chartjs-chart-matrix.js' : 'chartjs-chart-matrix.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);     
+        $filename = YII_DEBUG ? 'chartjs-chart-sankey.js' : 'chartjs-chart-sankey.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);     
+        $filename = YII_DEBUG ? 'chartjs-chart-wordcloud.js' : 'chartjs-chart-wordcloud.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);     
     }
 
     /* register the script for the jspdf package */

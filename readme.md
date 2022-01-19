@@ -1,5 +1,5 @@
 # YTK - Yii Toolkit
-> Version 1.0.2, 14. December, 2021
+> Version 1.1.1, 19. January, 2022
 
                       ___           ,-.  
             ,---,   ,--.'|_     ,--/-/|  
@@ -16,7 +16,7 @@
             `--`  Y i i  T o o l k i t 
                                         
 
-Copyright (c) 2013-2021 Andreas Pott
+Copyright (c) 2013-2022 Andreas Pott
 
 # About
 YTK is a collection of functions and widgets for the php web framework Yii (version 1.11).

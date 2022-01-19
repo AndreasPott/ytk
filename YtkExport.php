@@ -1,7 +1,7 @@
 <?php
 /* Ytk - Yii Toolkit
 *
-* Copyright (c) 2013-2021 Andreas Pott
+* Copyright (c) 2013-2022 Andreas Pott
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -138,7 +138,7 @@ class YtkExport extends CWidget
             }
             $line = array();
             foreach ($this->columns as $columns) {
-                $value = CHtml::value($item,$columns,"");
+                $value = CHtml::value($item, $columns, "");
                 // this handles a nasty bug in ExcelExport
                 if ($value == "0000-00-00")
                     $value = "";
