@@ -29,7 +29,7 @@ Copy this project to the extensions folder of the yii projects under `protected\
 ytk can be installed using composer from packagist as `"require": "aspott/ytk"`
 
 # Configure 
-To use the widgets, register ytk for autoloading in the file `protected\config\main.php` with the
+To use the widgets from ytk, register ytk for autoloading in the file `protected\config\main.php` with the
 following code snippet
 
 	// autoloading model and component classes
@@ -39,7 +39,20 @@ following code snippet
 		'application.extensions.ytk.*',     // <-- add this entry
 	),
 
-To the use the markdown renderer, add also the following entry to this config file
+Using a file alias of Yii with (to be defined in yii's `config.php` on top of the statement 
+returning the configuration array)
+    
+    Yii::setPathOfAlias('ytk', dirname(__FILE__).'/../extensions/vendor/aspott/ytk');
+    
+    require 'protected/extensions/vendor/autoload.php';
+
+The last line calls the autoload script from composer which is likely to be required by other 
+composer loaded extensions as well. Using the `setPathOfAlias`, one can shorten  references to 
+ytk components from `application.extensions.ytk.ytk` to `ytk.Ytk`. Make 
+sure that the latter `Ytk` starts with a capital letter if you are running Linux (as filename 
+are case sensitive).
+
+To use the markdown renderer as a view, add the following entry to this config file `config/main.php`
 under the section `components`
 
     // application components
@@ -53,11 +66,11 @@ under the section `components`
         // [...] some more components
     ),
 
-To use the javascript components in the package, add the ytk component as viewRenderer to the main 
+To use the javascript components/assets in the package, add the ytk component to the main 
 configuration file under `components`
 
     'ytk'=>array(
-        'class'=>'application.extensions.ytk.ytk',
+        'class'=>'application.extensions.ytk.Ytk',
     ),
 
 Additionally, the ytk component (with asset management must be initialized in protected/views/layout/main.php
@@ -68,7 +81,7 @@ directly after `<body>` (and if it is used right after the respective init call 
 # Usage of components
 The provided widgets (here `ytktile`) of the package can be used as follows:
 
-    $this->widget('application.extensions.ytk.ytktile', array(
+    $this->widget('application.extensions.ytk.YtkTile', array(
         'header'=>'Min Example',
         'labels'=>array('X'=>'primary'),
         'body'=>'Some content',
@@ -78,8 +91,12 @@ Functions from the namespace `Ytk` can be simply called by prefixing it with `Yt
 
     echo Ytk::EncodeSuccess('myLabel');
 
+Prior to using java script extensions (such as chart.js), add the following line in each view file
+
+    Yii::app()->ytk->register('chartjs');
+
 # Acknowledgement
-Ytk is shipped with a small collection of php and javascript libraries under either MIT or LGPL license. As these 
+Ytk is shipped with a collection of php and javascript libraries under either MIT or LGPL license. As these 
 libraries are exposed in the asset directory of the web projects, all thrid party code is fully available in source
 code. 
 
