@@ -86,6 +86,8 @@ class Ytk extends CApplicationComponent
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
         $filename = YII_DEBUG ? 'chartjs-plugin-colorschemes.js' : 'chartjs-plugin-colorschemes.js';
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
+        $filename = YII_DEBUG ? 'chartjs-plugin-annotation.min.js' : 'chartjs-plugin-annotation.min.js';
+        $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);    
         $filename = YII_DEBUG ? 'chartjs-chart-matrix.js' : 'chartjs-chart-matrix.js';
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);     
         $filename = YII_DEBUG ? 'chartjs-chart-sankey.js' : 'chartjs-chart-sankey.js';
