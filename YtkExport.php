@@ -41,7 +41,9 @@ class YtkExport extends CWidget
     public $dataProvider = null; 
     /* an array representing the names of the columns from the dataProvider to transformed. 
      * Names can be written in dot notation which allows to access data in related tables 
-     * e.g. user.username to get record->user->username */
+     * e.g. user.username to get record->user->username 
+     * Moreover, one can use the formatting syntax from CGridView with column:type:header 
+     * to cuomstize output.*/
     public $columns = array();
     /* The file format used for the output. Defaults to csv but will be extended 
        as the class evolves */
@@ -71,7 +73,7 @@ class YtkExport extends CWidget
 
     public function init() 
     {
-        parent::init(); 
+        parent::init();
         if ($this->dataProvider === null) { 
             $this->dataProvider = null; 
         }
@@ -108,7 +110,7 @@ class YtkExport extends CWidget
 		$this->dataProvider->getPagination()->pageSize = $this->maxSize;
         $items = $this->dataProvider->getData();
         
-        // search for wildcards "*"
+        // search for wildcards "*" to expend full attribute list
         $insertpos = -1;
         foreach ($this->columns as $pos=>$column) {
             if ($column == "*")
@@ -122,23 +124,37 @@ class YtkExport extends CWidget
             $this->columns = array_keys( $items[0]->attributes);
         }
 
-        // render only the columns defined by the array $columns
-        if (count($items) > 0 && $this->include_header == true)
-        {
-            // @TODO: Reconsider if we want to check already here if the columns exist?
-            $header = array();
-            foreach ($this->columns as $columns) 
-                array_push($header, $columns);
-            array_push($result, $header);               
+        // @TODO: Reconsider if we want to check already here if the columns exist?
+        // if the user provided us with a formatter or custom label, we extract this and use it for rendering the cells
+        $labels = array();
+        $columninfo = array();
+        foreach ($this->columns as $columns) {
+            // we use the same syntax for columns that is also used in CGridView to easy exporting of visualized tables
+            // column_name[:type[:label]] where for type and label are optional and default to type=text and label=column_name
+            if (!preg_match('/^([\w\.]+)(:(\w*))?(:(.*))?$/', $columns, $matches))
+                throw new CException('YtkExport::transformArray: The column must be specified in the format of "Name:Type:Label", where "Type" and "Label" are optional.');
+            $name = $matches[1];
+            $type = "text";
+            if (isset($matches[3]) && $matches[3] !== '')
+                $type = $matches[3];
+            $label = $name;
+            if (isset($matches[5]))
+                $label = $matches[5];
+
+            array_push($labels, $label);
+            array_push($columninfo, array('name' => $name, 'formatter' => $type, 'label' => $label));
         }
+        // we simply add the label row as first line prior to data
+        if ($this->include_header == true)
+            array_push($result, $labels);
 
         foreach ($items as $item) {
             if ($this->validateRecords && !$item->validate()) {
                 echo "ERROR: Validation failed. Skipping this record $item->id\n";
             }
             $line = array();
-            foreach ($this->columns as $columns) {
-                $value = CHtml::value($item, $columns, "");
+            foreach ($columninfo as list('name' => $name, 'formatter' => $type, 'label' => $label)) {
+                $value = CHtml::value($item, $name, "");
                 // this handles a nasty bug in ExcelExport
                 if ($value == "0000-00-00")
                     $value = "";

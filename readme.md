@@ -1,5 +1,5 @@
 # YTK - Yii Toolkit
-> Version 1.1.1, 19. January, 2022
+> Version 1.1.3, August, 7th, 2022
 
                       ___           ,-.  
             ,---,   ,--.'|_     ,--/-/|  
@@ -30,7 +30,7 @@ ytk can be installed using composer from packagist as `"require": "aspott/ytk"`
 
 # Configure 
 To use the widgets from ytk, register ytk for autoloading in the file `protected\config\main.php` with the
-following code snippet
+following code snippet (after manuall install)
 
 	// autoloading model and component classes
 	'import'=>array(
@@ -39,8 +39,8 @@ following code snippet
 		'application.extensions.ytk.*',     // <-- add this entry
 	),
 
-Using a file alias of Yii with (to be defined in yii's `config.php` on top of the statement 
-returning the configuration array)
+If composer was used, the alias must be changes. Using a file alias of Ytk with (to be defined in 
+yii's `config.php` on top of the statement returning the configuration array)
     
     Yii::setPathOfAlias('ytk', dirname(__FILE__).'/../extensions/vendor/aspott/ytk');
     
@@ -50,9 +50,15 @@ The last line calls the autoload script from composer which is likely to be requ
 composer loaded extensions as well. Using the `setPathOfAlias`, one can shorten  references to 
 ytk components from `application.extensions.ytk.ytk` to `ytk.Ytk`. Make 
 sure that the latter `Ytk` starts with a capital letter if you are running Linux (as filename 
-are case sensitive).
+are case sensitive). So aliasing with composer shortens the import array as follows
 
-To use the markdown renderer as a view, add the following entry to this config file `config/main.php`
+	'import'=>array(
+		'application.models.*',
+		// ...
+		'ytk.*',                            // <-- see the shortend syntax thanks to aliasing
+	),
+
+To use Ytk's markdown renderer as a view, add the following entry to the config file `config/main.php`
 under the section `components`
 
     // application components
@@ -73,6 +79,8 @@ configuration file under `components`
         'class'=>'application.extensions.ytk.Ytk',
     ),
 
+Also, here this is reducted to 'ytk.Ytk' when using the aliasing.
+
 Additionally, the ytk component (with asset management must be initialized in protected/views/layout/main.php
 directly after `<body>` (and if it is used right after the respective init call for the bootstrap components) with
 
@@ -86,6 +94,8 @@ The provided widgets (here `ytktile`) of the package can be used as follows:
         'labels'=>array('X'=>'primary'),
         'body'=>'Some content',
     ));
+
+With aliasing, also the name of the widgets is reduced to `'ytk.YtkTile'`. 
 
 Functions from the namespace `Ytk` can be simply called by prefixing it with `Ytk::`
 
