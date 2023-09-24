@@ -65,6 +65,8 @@ class YtkExport extends CWidget
     // that might cause problems in target file
     public function clean($string) {
         // we must not have the csv separator char (default semicolon ";" ) in the exported strings
+        // we transform german umlauts to international chars prior to cleaning
+        $string = str_replace(array('ä','ö','ü', 'Ä', 'Ö'. 'Ü', 'ß'), array('ae', 'oe', 'ue', 'Ae', 'Oe', 'Ue', 'ss'), $string);
         if ($this->separator==";" && $this->fileformat == 'csv')
             return preg_replace("/[^a-zA-Z0-9 ()%:\-\+@.\/]/", "", $string);
         else
@@ -155,6 +157,8 @@ class YtkExport extends CWidget
             $line = array();
             foreach ($columninfo as list('name' => $name, 'formatter' => $type, 'label' => $label)) {
                 $value = CHtml::value($item, $name, "");
+                if ($value instanceof CActiveRecord)
+                    $value = get_class($value)." CActiveRecord";
                 // this handles a nasty bug in ExcelExport
                 if ($value == "0000-00-00")
                     $value = "";
