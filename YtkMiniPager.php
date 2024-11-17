@@ -1,7 +1,7 @@
 <?php 
 /* Ytk - Yii Toolkit
 *
-* Copyright (c) 2013-2023 Andreas Pott
+* Copyright (c) 2013-2024 Andreas Pott
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,10 @@ class YtkMiniPager extends CWidget {
     // on the middle button
     public $links;
 
+    // optional parameter for link generation: string with the name of the model column that shall be
+    // displayed in the dropdown link. Defaults to 'name'
+    public $linkAttribute;
+
     // name of the primary key attribute in $model
     public $pk;
 
@@ -77,6 +81,8 @@ class YtkMiniPager extends CWidget {
             $this->filter = 'TRUE';     
         if ($this->links === null)
             $this->links = false;
+        if ($this->linkAttribute === null)
+            $this->linkAttribute = "name";
         // if no name for primary key (used for navigation forth and back) is given, load the 
         // primary key from the model
         if ($this->pk === null)
@@ -93,14 +99,14 @@ class YtkMiniPager extends CWidget {
 
         // find the next model after the current one
         $res = $model::model()->findAll(array(
-            'condition'=>$this->filter." AND $pk > ".$this->item->$pk,
+            'condition'=>$this->filter." AND $pk > '".$this->item->$pk."'",
             'order'=>"$pk ASC",
             'limit'=>1));
         $next_id = count($res)>0 ? $res[0]->$pk : 0;
 
         // find previous model before the current one
         $res = $model::model()->findAll(array(
-            'condition'=>$this->filter." AND $pk < ".$this->item->$pk,
+            'condition'=>$this->filter." AND $pk < '".$this->item->$pk."'",
             'order'=>"$pk DESC",
             'limit'=>1));
         $prev_id = count($res)>0 ? $res[0]->$pk : 0;
@@ -109,12 +115,12 @@ class YtkMiniPager extends CWidget {
         $cnt = $model::model()->count(array(
             'condition'=>$this->filter));
         $idx = $model::model()->count(array(
-            'condition'=>$this->filter." AND $this->pk <= ".$this->item->$pk));
+            'condition'=>$this->filter." AND $this->pk <= '".$this->item->$pk."'"));
 
         // generate the optional links of the dropdown menu
         $dirLinks = array();
         if ($this->links === true) {
-            $res = CHtml::listData($model::model()->findAll(array('condition'=>$this->filter)), "$pk", 'name');
+            $res = CHtml::listData($model::model()->findAll(array('condition'=>$this->filter)), "$pk", $this->linkAttribute);
             foreach ($res as $id=>$name)
                 $dirLinks[] = array('label'=>$name, 'url'=>array($this->url, "$pk"=>$id));
         }
