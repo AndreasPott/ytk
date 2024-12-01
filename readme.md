@@ -1,5 +1,5 @@
 # YTK - Yii Toolkit
-> Version 1.1.5, November, 17th, 2024
+> Version 1.1.6, December, 1st, 2024
 
                       ___           ,-.  
             ,---,   ,--.'|_     ,--/-/|  
@@ -20,10 +20,10 @@ Copyright (c) 2013-2024 Andreas Pott
 
 # About
 YTK is a collection of functions and widgets for the php web framework Yii (version 1.11).
-The toolkit is designed to to be used along with the bootstrap extension for Yii.
+The toolkit is designed to be used along with the bootstrap extension for Yii.
 
-# Install
-Copy this project to the extensions folder of the yii projects under `protected\extensions\ytk`
+# Install (manually)
+Copy this project to the extensions folder of the yii projects under `protected\extensions\ytk` 
 
 # Install using composer
 ytk can be installed using composer from packagist as `"require": "aspott/ytk"`
@@ -113,3 +113,6 @@ code.
 # License
 
 The YTK is licensed under MIT license, a weak copyleft open source license.
+
+The package contains several libaray including chart.js, some of its plug-ins, easymde, jspdf, and mermaid. The authors 
+of there libraries are hereby gratefully acknowledged for their outstanding work.

@@ -59,10 +59,10 @@ class Ytk extends CApplicationComponent
     protected function getScripts()
     {
         return array(
-            'mermaid'=>'registerMermaid',
-            'chartjs'=>'registerChartjs',
-            'jspdf'=>'registerJspdf',
-            'simplemde'=>'registerSimplemde',
+            'mermaid' => 'registerMermaid',
+            'chartjs' => 'registerChartjs',
+            'jspdf' => 'registerJspdf',
+            'simplemde' => 'registerSimplemde',
         );
     }
 
@@ -106,15 +106,18 @@ class Ytk extends CApplicationComponent
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
     }
 
-    /* register the script for the simpleMDE package */
+    /** register the script for the simpleMDE package;
+     *  as if Nov/2024 simplemde was replaced by its work easymde which is essentially a 
+     *  newer version of simplemde where the original software is discontinued 
+     */
     protected function registerSimplemde($position = CClientScript::POS_HEAD)
     {
         /** @var CClientScript $cs */
         $cs = Yii::app()->getClientScript();
 
-        $filename = YII_DEBUG ? 'simplemde.min.js' : 'simplemde.min.js';
+        $filename = YII_DEBUG ? 'easymde.min.js' : 'easymde.min.js';
         $cs->registerScriptFile($this->getAssetsUrl().'/'.$filename, $position);
-		$filename = YII_DEBUG ? 'simplemde.min.css' : 'simplemde.min.css';
+		$filename = YII_DEBUG ? 'easymde.min.css' : 'easymde.min.css';
 		$cs->registerCssFile($this->getAssetsUrl().'/'.$filename);        
     }
 
